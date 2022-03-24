@@ -1,130 +1,95 @@
-import { View, Text, StyleSheet } from 'react-native'
-import React from 'react'
-import Header from './components/Header'
-import StartGame from './screens/StartGame'
+import { Button, StyleSheet, TouchableOpacity, View } from "react-native";
+import React, { useState } from "react";
+import NewItem from "./screens/NewItem";
+import ItemList from "./screens/ItemList";
 
 const App = () => {
+  const [buttonType, setButtonType] = useState("Add Item");
+  const [itemList, setItemList] = useState([]);
+  const [isList, setIsList] = useState(true);
+  const [id, setId] = useState("");
+  const [selectItem, setSelectItem] = useState("");
+
+  const createButtonClick = () => {
+    setIsList(false);
+  };
+
+  const addItemHandler = (value, id) => {
+    if (!value) {
+      return;
+    }
+
+    if (!id) {
+      setItemList((items) => [
+        ...items,
+        { id: items.length + 1, title: value },
+      ]);
+    } else {
+      const availableItem = [...itemList];
+      const findItemIndex = availableItem.findIndex((item) => item.id === id);
+      if (findItemIndex != -1) {
+        availableItem[findItemIndex] = { id: id, title: value };
+        setItemList(availableItem);
+      }
+    }
+    setIsList(true);
+    setId("");
+    setButtonType("Add Item");
+    setSelectItem("");
+  };
+
+  const cancelHandler = () => {
+    setIsList(true);
+    setId("");
+    setButtonType("Add Item");
+    setSelectItem("");
+  };
+
+  const setHandler = (id) => {
+    setIsList(false);
+    setButtonType("Update Item");
+    setId(id);
+    const findItem = itemList.find((item) => item.id == id);
+    setSelectItem(findItem);
+  };
+
+  const deleteHandler = (id) => {
+    const availableItem = [...itemList];
+    const newItems = availableItem.filter((item) => item.id !== id);
+    setItemList(newItems);
+  };
+
   return (
     <View style={styles.container}>
-      <Header />
-      <StartGame />
+      {isList && (
+        <View style={styles.btn}>
+          <Button onPress={createButtonClick} title="Create Item" />
+        </View>
+      )}
+      {isList ? (
+        <ItemList deleteHandler={deleteHandler} setHandler={setHandler} listItems={itemList} />
+      ) : (
+        <NewItem
+          id={id}
+          selectItem={selectItem}
+          addItemHandler={addItemHandler}
+          buttonType={buttonType}
+          cancleHandler={cancelHandler}
+        />
+      )}
     </View>
-  )
-}
+  );
+};
 
-export default App
+export default App;
 
 const styles = StyleSheet.create({
-  container:{
-    flex:1
-  }
-})
-
-
-// import { useState } from "react";
-// import {
-//   StyleSheet,
-//   Text,
-//   View,
-//   Button,
-//   TextInput,
-//   FlatList,
-//   TouchableOpacity,
-//   Modal,
-// } from "react-native";
-
-// export default function App() {
-//   const [items, setItems] = useState([]);
-//   const [value, setValue] = useState("");
-//   const [visible, setVisible] = useState(false);
-
-//   const addValueToItem = () => {
-//     setItems((p) => [...p, { id: items.length + 1, title: value }]);
-//     setValue("");
-//     setVisible(false)
-//   };
-
-//   const removeItem = (id) => {
-//     const availableItems = items.filter((item) => item.id !== id);
-
-//     setItems(availableItems);
-//   };
-
-//   return (
-//     <View style={styles.container}>
-
-//       <Modal animationType='slide' visible={visible}>
-//         <View style={styles.form}>
-//           <TextInput
-//             style={styles.input}
-//             placeholder="Enter Value"
-//             value={value}
-//             onChangeText={(e) => setValue(e)}
-//           />
-//           <Button
-//             style={styles.btn}
-//             title="Click Me"
-//             onPress={addValueToItem}
-//           />
-//         </View>
-//       </Modal>
-
-//       <Button onPress={()=>setVisible(true)} title="Add Item" />
-
-//       <FlatList
-//         keyExtractor={(item, index) => index}
-//         data={items}
-//         renderItem={(itemData) => (
-//           <TouchableOpacity onPress={() => removeItem(itemData.item.id)}>
-//             <View>
-//               <Text style={styles.item}>{itemData.item.title}</Text>
-//             </View>
-//           </TouchableOpacity>
-//         )}
-//         style={styles.items}
-//       ></FlatList>
-//     </View>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: "#fff",
-//     alignItems: "flex-start",
-//     justifyContent: "flex-start",
-//     width: "100%",
-//     marginTop: 50,
-//   },
-//   form: {
-//     flexDirection: "column",
-//     justifyContent: "flex-start",
-//     alignItems: "flex-end",
-//     width: "80%",
-//     margin: "10%",
-//   },
-//   input: {
-//     borderBottomColor: "black",
-//     borderWidth: 2,
-//     padding: 10,
-//     width: "100%",
-//     marginBottom: 10,
-//   },
-
-//   btn: {
-//     textAlign: "right",
-//     width: 10,
-//   },
-
-//   items: {
-//     width: "80%",
-//     margin: "10%",
-//   },
-
-//   item: {
-//     width: "90%",
-//     padding: 4,
-//     borderWidth: 2,
-//     color: "black",
-//   },
-// });
+  container: {
+    flex: 1,
+    width: "90%",
+    margin: "5%",
+  },
+  btn: {
+    margin: 10,
+  },
+});
